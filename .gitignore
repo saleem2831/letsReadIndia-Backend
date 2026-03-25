@@ -8,6 +8,7 @@ node_modules/
 # Environment Files
 # ==============================
 .env
+.env.upload
 .env.*
 backend/.env
 ecommerce-frontend/.env
