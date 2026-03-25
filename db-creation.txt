@@ -1,0 +1,139 @@
+CREATE DATABASE ecommerce_db;
+USE ecommerce_db;
+
+
+CREATE TABLE admins (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(100),
+  email VARCHAR(100) UNIQUE,
+  password VARCHAR(255),
+  role ENUM('super_admin','admin') DEFAULT 'admin',
+  status ENUM('active','inactive') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+INSERT INTO admins (name,email,password,role)
+VALUES (
+  'Super Admin',
+  'admin@letsreadindia.in',
+  '$2b$10$Q8zNAz.6ohkapJYX38.CbeGDGJotHsXOzjN4EsylVzBQufjo8iJLq',
+  'super_admin'
+);
+
+// permission for root password
+ALTER USER 'root'@'localhost'
+IDENTIFIED WITH mysql_native_password
+BY '2831';
+
+FLUSH PRIVILEGES;
+
+
+use ecommerce_db
+SELECT id,name,email,role,status FROM admins;
+
+
+SELECT status FROM admins WHERE id=2;
+
+CREATE TABLE products (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(200),
+  description TEXT,
+  price DECIMAL(10,2),
+  stock INT,
+  image VARCHAR(255),
+  status ENUM('active','inactive') DEFAULT 'active',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE orders (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_number VARCHAR(50),
+  customer_name VARCHAR(100),
+  email VARCHAR(100),
+  phone VARCHAR(20),
+  address TEXT,
+  subtotal DECIMAL(10,2),
+  delivery_fee DECIMAL(10,2),
+  total DECIMAL(10,2),
+  status ENUM('pending','assigned','shipped','delivered') DEFAULT 'pending',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE order_items (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  product_id INT,
+  quantity INT,
+  price DECIMAL(10,2),
+  FOREIGN KEY (order_id) REFERENCES orders(id)
+);
+
+CREATE TABLE order_assignments (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT,
+  admin_id INT,
+  assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (admin_id) REFERENCES admins(id)
+);
+
+CREATE TABLE product_images (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  product_id INT,
+  image_url VARCHAR(500),
+  is_primary BOOLEAN DEFAULT false,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE CASCADE
+);
+
+
+ALTER TABLE orders
+ADD COLUMN payment_id VARCHAR(100),
+ADD COLUMN razorpay_order_id VARCHAR(100),
+ADD COLUMN payment_mode ENUM('online') DEFAULT 'online',
+ADD COLUMN payment_status ENUM('paid','failed','pending') DEFAULT 'paid';
+
+
+ALTER TABLE orders
+ADD COLUMN waybill VARCHAR(50),
+ADD COLUMN shipment_status VARCHAR(50);
+
+ALTER TABLE orders ADD COLUMN pincode VARCHAR(10);
+
+
+ALTER TABLE orders
+ADD COLUMN shipment_id BIGINT NULL,
+ADD COLUMN courier_name VARCHAR(100) NULL,
+ADD COLUMN shipping_label_url TEXT NULL,
+ADD COLUMN tracking_url TEXT NULL;
+
+
+ALTER TABLE orders
+ADD COLUMN city VARCHAR(100),
+ADD COLUMN state VARCHAR(100),
+ADD COLUMN country VARCHAR(100) DEFAULT 'India';
+
+
+ALTER TABLE orders ADD COLUMN delivered_at DATETIME;
+
+
+CREATE TABLE returns (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  order_id INT NOT NULL,
+  order_item_id INT NOT NULL,
+  reason TEXT,
+  status VARCHAR(50) DEFAULT 'requested',
+  refund_amount DECIMAL(10,2),
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (order_id) REFERENCES orders(id),
+  FOREIGN KEY (order_item_id) REFERENCES order_items(id)
+);
+
+
+
+ALTER TABLE returns
+ADD COLUMN shiprocket_shipment_id VARCHAR(255),
+ADD COLUMN pickup_status VARCHAR(100),
+ADD COLUMN refunded_at TIMESTAMP NULL;

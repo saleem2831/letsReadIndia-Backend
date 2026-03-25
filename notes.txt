@@ -1,0 +1,36 @@
+genaration of secret key :-
+node -e "console.log(require('crypto').randomBytes(16).toString('hex'))"
+
+
+phase 2 integrartion pending
+
+Multiple images per product
+
+Image compression
+
+S3 / Cloudinary migration
+
+Note:- Cloudnary currently using shaiksaleem1840@gmail.com
+
+
+Razorpay
+hasnain@letsreadindia.in
+Litacademy@15518
+061025
+
+https://one.delhivery.com/
+Email: hasnain@letsreadindia.in
+Password: Litacademy@15518
+
+
+RAZORPAY_KEY_ID=rzp_test_SCR5PXbtiFZ9CK
+RAZORPAY_KEY_SECRET=naDiLdY3g39ZvWRZZIZcVcga
+
+
+Card Number: 4111 1111 1111 1111
+Expiry: Any future date
+CVV: 123
+OTP: 123456
+
+
+
