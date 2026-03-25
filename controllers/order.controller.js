@@ -10,16 +10,7 @@ import { json } from 'stream/consumers';
 
 export const placeOrder = async (req, res) => {
   try {
-    // const {
-    //   payment_id,
-    //   order_id,
-    //   signature,
-    //   customer_name,
-    //   email,
-    //   phone,
-    //   address,
-    //   items
-    // } = req.body;
+
 
     const {
   payment_id,
@@ -81,26 +72,7 @@ export const placeOrder = async (req, res) => {
     const total = subtotal + delivery_fee;
     const order_number = `ORD-${Date.now()}`;
 
-    // 🧾 3. Insert order
-    // const [orderResult] = await db.query(
-    //   `INSERT INTO orders
-    //    (order_number, customer_name, email, phone, address,
-    //     subtotal, delivery_fee, total,
-    //     payment_id, razorpay_order_id, payment_mode, payment_status, status,pincode)
-    //    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'online', 'paid', 'assigned','500011')`,
-    //   [
-    //     order_number,
-    //     customer_name,
-    //     email,
-    //     phone,
-    //     address,
-    //     subtotal,
-    //     delivery_fee,
-    //     total,
-    //     payment_id,
-    //     order_id
-    //   ]
-    // );
+
 
 const [orderResult] = await db.query(
   `INSERT INTO orders
@@ -159,24 +131,6 @@ const [orderResult] = await db.query(
     // console.log("Order Data", json.stringify(orderRow));
 
 (async () => {
-  // try {
-  //   const delhiveryRes = await createDelhiveryShipment(orderRow, items);
-  //   // console.log('DELHIVERY RESPONSE:', delhiveryRes);
-
-  //   const waybill =
-  //     delhiveryRes?.packages?.[0]?.waybill ||
-  //     delhiveryRes?.Shipment?.[0]?.AWB ||
-  //     null;
-
-  //   if (waybill) {
-  //     await db.query(
-  //       `UPDATE orders SET waybill=?, shipment_status='created' WHERE id=?`,
-  //       [waybill, orderId]
-  //     );
-  //   }
-  // } catch (err) {
-  //   console.error('Delhivery failed:', err.message);
-  // }
 
 
   try {
