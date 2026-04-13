@@ -1052,6 +1052,7 @@ doc
       .text("Item", 50, startY)
       .text("Qty", 300, startY)
       .text("Price", 350, startY)
+      .text("Tax", 400, startY)
       .text("Total", 450, startY);
 
     doc.moveTo(50, startY + 15).lineTo(550, startY + 15).stroke();
@@ -1064,33 +1065,44 @@ doc
     doc.font("Helvetica").fontSize(10);
 
     items.forEach((item) => {
-      const total = item.price * item.quantity;
-      subtotal += total;
+
+    const itemPrice = item.price - item.price*0.18;
+    const tax = item.price*0.18;
+
+      // const total = item.price * item.quantity;
+      const total = itemPrice * item.quantity;
+
+      const finalTotal = total + tax;
+            subtotal += finalTotal;
+
+
 
       doc.text(item.name, 50, y);
       doc.text(item.quantity.toString(), 300, y);
-      doc.text(`₹${item.price}`, 350, y);
-      doc.text(`₹${total}`, 450, y);
+      // doc.text(`₹${item.price}`, 350, y);
+      doc.text(`${itemPrice}`, 350, y);
+      doc.text(`${tax}`, 400, y);
+
+      doc.text(`₹${finalTotal}`, 450, y);
 
       y += 20;
     });
 
     /* ================= TOTAL ================= */
 
-    const tax = subtotal * 0.18;
+    // const tax = subtotal * 0.18;
     const delivery = Number(order.delivery_fee || 0);
-    const grandTotal = subtotal + tax + delivery;
+    const grandTotal = subtotal + delivery;
 
     doc.moveDown(2);
 
-    doc.text(`Subtotal: ₹${subtotal.toFixed(2)}`, { align: "right" });
-    doc.text(`GST (18%): ₹${tax.toFixed(2)}`, { align: "right" });
-    doc.text(`Delivery: ₹${delivery.toFixed(2)}`, { align: "right" });
+    doc.text(`Subtotal: ${subtotal.toFixed(2)}`, { align: "right" });
+    doc.text(`Delivery: ${delivery.toFixed(2)}`, { align: "right" });
 
     doc
       .fontSize(13)
       .fillColor("#16a34a")
-      .text(`Grand Total: ₹${grandTotal.toFixed(2)}`, { align: "right" });
+      .text(`Grand Total: ${grandTotal.toFixed(2)}`, { align: "right" });
 
     doc.fillColor("black");
 
@@ -1099,6 +1111,7 @@ doc
     if (qrImage) {
       doc.moveDown(2);
       doc.image(qrImage, 50, doc.y, { width: 80 });
+      doc.moveDown(5);
       doc.text("Scan to Track", 50);
     }
 

@@ -26,31 +26,6 @@ export const createAdmin = async (req, res) => {
   res.json({ message: 'Admin created successfully' });
 };
 
-/* GET ADMINS WITH PAGINATION */
-// export const getAdmins = async (req, res) => {
-//   const page = parseInt(req.query.page) || 1;
-//   const limit = 20;
-//   const offset = (page - 1) * limit;
-
-//   const [admins] = await db.query(
-//     `SELECT id, name, email, role, status
-//      FROM admins
-//      WHERE role='admin'
-//      LIMIT ? OFFSET ?`,
-//     [limit, offset]
-//   );
-
-//   const [[{ count }]] = await db.query(
-//     `SELECT COUNT(*) as count FROM admins WHERE role='admin'`
-//   );
-
-//   res.json({
-//     data: admins,
-//     total: count,
-//     page,
-//     pages: Math.ceil(count / limit)
-//   });
-// };
 
 
 export const getAdmins = async (req, res) => {
@@ -113,10 +88,7 @@ export const updateAdminStatus = async (req, res) => {
 };
 
 /* DELETE ADMIN */
-// export const deleteAdmin = async (req, res) => {
-//   await db.query('DELETE FROM admins WHERE id=?', [req.params.id]);
-//   res.json({ message: 'Admin deleted' });
-// };
+
 
 export const deleteAdmin = async (req, res) => {
   const adminId = req.params.id;
@@ -180,27 +152,6 @@ export const deleteAdmin = async (req, res) => {
 
 // /Update Admin password/ 
 
-// export const updateAdminPassword = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-//     const { password } = req.body;
-
-//     if (!password) {
-//       return res.status(400).json({ message: "Password required" });
-//     }
-
-//     const hash = await bcrypt.hash(password, 10);
-
-//     await db.query(
-//       "UPDATE admins SET password=? WHERE id=?",
-//       [hash, id]
-//     );
-
-//     res.json({ message: "Password updated successfully" });
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error", error: err.message });
-//   }
-// };
 
 export const updateAdmin = async (req, res) => {
   try {
@@ -242,124 +193,7 @@ export const updateAdmin = async (req, res) => {
 
 // Admin Controllers
 
-// export const getAdminDashboard = async (req, res) => {
-//   try {
-//     const adminId = req.user.id;
 
-//     const [[stats]] = await db.query(
-//       `
-//       SELECT
-//         COUNT(o.id) AS total_orders,
-//         SUM(o.status = 'pending') AS pending,
-//         SUM(o.status = 'assigned') AS assigned,
-//         SUM(o.status = 'shipped') AS shipped,
-//         SUM(o.status = 'delivered') AS delivered,
-//         COALESCE(SUM(o.total), 0) AS total_value,
-//         COUNT(DISTINCT o.email) AS total_customers
-//       FROM order_assignments oa
-//       JOIN orders o ON o.id = oa.order_id
-//       WHERE oa.admin_id = ?
-//       `,
-//       [adminId]
-//     );
-
-//     res.json(stats);
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// export const updateOrderStatus = async (req, res) => {
-//   try {
-//     const adminId = req.user.id;
-//     const { id } = req.params;
-//     const { status } = req.body;
-
-//     // ensure order belongs to this admin
-//     const [[exists]] = await db.query(
-//       `SELECT * FROM order_assignments WHERE order_id = ? AND admin_id = ?`,
-//       [id, adminId]
-//     );
-
-//     if (!exists) {
-//       return res.status(403).json({ message: "Not allowed" });
-//     }
-
-//     await db.query(`UPDATE orders SET status = ? WHERE id = ?`, [status, id]);
-
-//     res.json({ success: true });
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-
-// export const getAssignedOrders = async (req, res) => {
-//   try {
-//     const adminId = req.user.id;
-
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = 10;
-//     const offset = (page - 1) * limit;
-
-//     const search = req.query.search || "";
-//     const status = req.query.status || "";
-
-//     const [orders] = await db.query(
-//       `SELECT
-//         o.*,
-//         COALESCE(SUM(oi.quantity),0) AS total_quantity
-//        FROM orders o
-//        JOIN order_assignments oa ON oa.order_id = o.id
-//        LEFT JOIN order_items oi ON oi.order_id = o.id
-//        WHERE oa.admin_id = ?
-//        AND (o.order_number LIKE ? OR o.customer_name LIKE ?)
-//        AND (? = '' OR o.status = ?)
-//        GROUP BY o.id
-//        ORDER BY o.created_at DESC
-//        LIMIT ? OFFSET ?`,
-//       [adminId, `%${search}%`, `%${search}%`, status, status, limit, offset]
-//     );
-
-//     const [[{ count }]] = await db.query(
-//       `SELECT COUNT(*) as count
-//        FROM orders o
-//        JOIN order_assignments oa ON oa.order_id = o.id
-//        WHERE oa.admin_id = ?`,
-//       [adminId]
-//     );
-
-//     res.json({
-//       data: orders,
-//       page,
-//       pages: Math.ceil(count / limit),
-//     });
-//   } catch (err) {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
-
-// export const getOrderDetails = async (req, res) => {
-//   try {
-//     const { id } = req.params;
-
-//     const [items] = await db.query(
-//       `SELECT
-//         p.name,
-//         oi.quantity,
-//         oi.price
-//        FROM order_items oi
-//        JOIN products p ON p.id = oi.product_id
-//        WHERE oi.order_id = ?`,
-//       [id]
-//     );
-
-//     res.json(items);
-//   } catch {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 export const getAdminDashboard = async (req, res) => {
   try {
@@ -389,33 +223,6 @@ export const getAdminDashboard = async (req, res) => {
 };
 
 
-// export const updateOrderStatus = async (req, res) => {
-//   try {
-//     const adminId = req.user.id;
-//     const { id } = req.params;
-//     const { status } = req.body;
-
-//     const allowed = ["pending", "assigned", "shipped", "delivered"];
-//     if (!allowed.includes(status)) {
-//       return res.status(400).json({ message: "Invalid status" });
-//     }
-
-//     const [[exists]] = await db.query(
-//       `SELECT id FROM order_assignments WHERE order_id = ? AND admin_id = ?`,
-//       [id, adminId]
-//     );
-
-//     if (!exists) {
-//       return res.status(403).json({ message: "Not allowed" });
-//     }
-
-//     await db.query(`UPDATE orders SET status = ? WHERE id = ?`, [status, id]);
-
-//     res.json({ success: true });
-//   } catch {
-//     res.status(500).json({ message: "Server error" });
-//   }
-// };
 
 export const updateOrderStatus = async (req, res) => {
   try {
@@ -541,77 +348,6 @@ export const getOrderDetails = async (req, res) => {
 };
 
 
-// export const shipOrder = async (req, res) => {
-//   try {
-//     const adminId = req.user.id;
-//     const { id } = req.params;
-//     const { weight, length, breadth, height } = req.body;
-
-//     // Check assignment
-//     const [[allowed]] = await db.query(
-//       `SELECT id FROM order_assignments WHERE order_id=? AND admin_id=?`,
-//       [id, adminId]
-//     );
-
-//     if (!allowed) {
-//       return res.status(403).json({ message: "Not allowed" });
-//     }
-
-//     const [[order]] = await db.query(
-//       `SELECT * FROM orders WHERE id=?`,
-//       [id]
-//     );
-
-//     const [items] = await db.query(
-//       `SELECT p.name, oi.quantity, oi.price, oi.product_id
-//        FROM order_items oi
-//        JOIN products p ON p.id = oi.product_id
-//        WHERE oi.order_id=?`,
-//       [id]
-//     );
-
-//     // 1️⃣ Create Shiprocket Order
-//     const srOrder = await createShiprocketOrder(order, items, {
-//       weight,
-//       length,
-//       breadth,
-//       height,
-//     });
-
-//     const shipment_id = srOrder.shipment_id;
-
-//     // 2️⃣ Check Serviceability
-//     const service = await checkServiceability(
-//       "411042",
-//       order.pincode,
-//       weight
-//     );
-
-//     const courier =
-//       service.data.available_courier_companies.sort(
-//         (a, b) => a.rate - b.rate
-//       )[0];
-
-//     // 3️⃣ Assign AWB
-//     const awb = await assignAWB(shipment_id, courier.courier_company_id);
-
-//     // 4️⃣ Update DB
-//     await db.query(
-//       `UPDATE orders SET 
-//        waybill=?, 
-//        shipment_status='created',
-//        status='shipped'
-//        WHERE id=?`,
-//       [awb.awb_code, id]
-//     );
-
-//     res.json({ success: true, awb: awb.awb_code });
-//   } catch (err) {
-//     console.error("SHIP ERROR:", err.response?.data || err.message);
-//     res.status(500).json({ message: "Shipping failed" });
-//   }
-// };
-
 
 // export const shipOrder = async (req, res) => {
 //   try {
@@ -656,15 +392,22 @@ export const getOrderDetails = async (req, res) => {
 //       height,
 //     });
 
-//     const shipment_id = srOrder.shipment_id;
+//     console.log("SHIPROCKET ORDER RESPONSE:", srOrder);
+
+//     const shipment_id =
+//       srOrder?.shipment_id ||
+//       srOrder?.shipment_id?.[0];
 
 //     if (!shipment_id) {
-//       return res.status(500).json({ message: "Shipment ID not generated" });
+//       return res.status(500).json({
+//         message: "Shipment ID not generated",
+//         fullResponse: srOrder
+//       });
 //     }
 
 //     // 5️⃣ Check Serviceability
 //     const service = await checkServiceability(
-//       "411042", // pickup pincode
+//       "411042",
 //       order.pincode,
 //       weight
 //     );
@@ -685,13 +428,21 @@ export const getOrderDetails = async (req, res) => {
 //       cheapestCourier.courier_company_id
 //     );
 
-//     const awbCode = awbRes.awb_code;
+//     console.log("AWB RESPONSE:", awbRes);
+
+//     const awbCode = awbRes?.response?.awb_code;
 
 //     if (!awbCode) {
-//       return res.status(500).json({ message: "AWB not generated" });
+//       return res.status(500).json({
+//         message: "AWB not generated",
+//         fullResponse: awbRes
+//       });
 //     }
 
-//     // 7️⃣ Update DB
+//     // 7️⃣ Generate Pickup
+//     await generatePickup(shipment_id);
+
+//     // 8️⃣ Update DB
 //     await db.query(
 //       `UPDATE orders SET 
 //        shipment_id=?,
@@ -725,11 +476,17 @@ export const getOrderDetails = async (req, res) => {
 // };
 
 
+
 export const shipOrder = async (req, res) => {
   try {
     const adminId = req.user.id;
     const { id } = req.params;
-    const { weight, length, breadth, height } = req.body;
+
+    // ✅ Default dimensions (NO UI REQUIRED)
+    const weight = req.body.weight || 0.5;
+    const length = req.body.length || 10;
+    const breadth = req.body.breadth || 10;
+    const height = req.body.height || 10;
 
     // 1️⃣ Check assignment
     const [rows] = await db.query(
@@ -770,89 +527,59 @@ export const shipOrder = async (req, res) => {
 
     console.log("SHIPROCKET ORDER RESPONSE:", srOrder);
 
-    const shipment_id =
-      srOrder?.shipment_id ||
-      srOrder?.shipment_id?.[0];
+    const shipment_id = srOrder?.shipment_id;
 
     if (!shipment_id) {
       return res.status(500).json({
         message: "Shipment ID not generated",
-        fullResponse: srOrder
+        fullResponse: srOrder,
       });
     }
 
-    // 5️⃣ Check Serviceability
-    const service = await checkServiceability(
-      "411042",
-      order.pincode,
-      weight
-    );
-
-    const courierList = service?.data?.available_courier_companies;
-
-    if (!courierList || !courierList.length) {
-      return res.status(400).json({ message: "No courier available" });
-    }
-
-    const cheapestCourier = courierList.sort(
-      (a, b) => a.rate - b.rate
-    )[0];
-
-    // 6️⃣ Assign AWB
-    const awbRes = await assignAWB(
-      shipment_id,
-      cheapestCourier.courier_company_id
-    );
+    // ✅ 5️⃣ Assign AWB (AUTO - NO COURIER ID)
+    const awbRes = await assignAWB(shipment_id);
 
     console.log("AWB RESPONSE:", awbRes);
 
-    const awbCode = awbRes?.response?.awb_code;
-
-    if (!awbCode) {
-      return res.status(500).json({
-        message: "AWB not generated",
-        fullResponse: awbRes
+    // ✅ Proper validation
+    if (awbRes?.awb_assign_status !== 1) {
+      return res.status(400).json({
+        message: "AWB assignment failed",
+        error: awbRes?.response?.data,
       });
     }
 
-    // 7️⃣ Generate Pickup
-    await generatePickup(shipment_id);
+    const awbCode = awbRes?.response?.data?.awb_code;
 
-    // 8️⃣ Update DB
+    // 6️⃣ Generate Pickup
+    // await generatePickup(shipment_id);
+
+    // 7️⃣ Update DB
     await db.query(
       `UPDATE orders SET 
        shipment_id=?,
        waybill=?,
-       courier_name=?,
        shipment_status='created',
        status='shipped'
        WHERE id=?`,
-      [
-        shipment_id,
-        awbCode,
-        cheapestCourier.courier_name,
-        id
-      ]
+      [shipment_id, awbCode, id]
     );
 
     res.json({
       success: true,
       shipment_id,
       awb: awbCode,
-      courier: cheapestCourier.courier_name
     });
 
   } catch (err) {
     console.error("🔥 SHIP ERROR FULL:", err.response?.data || err);
+
     res.status(500).json({
       message: "Shipping failed",
-      error: err.response?.data || err.message
+      error: err.response?.data || err.message,
     });
   }
 };
-
-
-
 
 
 // export const getAllReturnRequests = async (req, res) => {
@@ -881,6 +608,8 @@ export const shipOrder = async (req, res) => {
 //     res.status(500).json({ message: "Server error" });
 //   }
 // };
+
+
 
 export const getAllReturnRequests = async (req, res) => {
   try {
