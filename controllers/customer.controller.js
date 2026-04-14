@@ -1083,7 +1083,7 @@ doc
       doc.text(`${itemPrice}`, 350, y);
       doc.text(`${tax}`, 400, y);
 
-      doc.text(`₹${finalTotal}`, 450, y);
+      doc.text(`${finalTotal}`, 450, y);
 
       y += 20;
     });

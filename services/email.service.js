@@ -8,19 +8,16 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// export const sendOrderEmail = async (order) => {
-//   await transporter.sendMail({
-//     from: '"LetsReadIndia" <no-reply@letsreadindia.com>',
-//     to: order.email,
-//     subject: `Order Confirmed - ${order.order_number}`,
-//     html: `
-//       <h2>Thank you for your order</h2>
-//       <p>Order ID: <b>${order.order_number}</b></p>
-//       <p>Total: ₹${order.total}</p>
-//       <p>We will notify you once shipped.</p>
-//     `
-//   });
-// };
+// const transporter = nodemailer.createTransport({
+//   host: "smtp.zoho.com",
+//   port: 465,
+//   secure: true, // true for 465
+//   auth: {
+//     user: process.env.EMAIL_USER,
+//     pass: process.env.EMAIL_PASS,
+//   },
+// });
+
 
 
 export const sendOrderEmail = async (order) => {
@@ -62,12 +59,6 @@ export const sendOrderEmail = async (order) => {
                  🔍 Track Your Order
               </a>
 
-              <!-- View Order Button -->
-              <a href="${process.env.FRONTEND_URL}/orders/${order.order_number}"
-                 style="background:#2563eb; color:#fff; padding:12px 20px; text-decoration:none; border-radius:6px; display:inline-block; margin:5px;">
-                 📦 View Order
-              </a>
-
             </div>
 
             <p>If you have any questions, feel free to contact us.</p>
@@ -87,20 +78,7 @@ export const sendOrderEmail = async (order) => {
 
 /* ================= PARENT INQUIRY EMAIL ================= */
 
-// export const sendParentInquiryEmail = async (data) => {
-//   await transporter.sendMail({
-//     from: `"LetsReadIndia Website" <${process.env.EMAIL_USER}>`,
-//     to: "support@letsreadindia.com,shaiksaleem2831@gmail.com", // where you want to receive
-//     subject: "New Parent Inquiry",
-//     html: `
-//       <h3>New Parent Inquiry Received</h3>
-//       <p><strong>Name:</strong> ${data.name}</p>
-//       <p><strong>Email:</strong> ${data.email}</p>
-//       <p><strong>Phone:</strong> ${data.phone}</p>
-//       <p><strong>Child Age:</strong> ${data.childAge}</p>
-//     `,
-//   });
-// };
+
 
 export const sendParentInquiryEmail = async (data) => {
   await transporter.sendMail({
@@ -164,21 +142,7 @@ export const sendParentInquiryEmail = async (data) => {
 
 /* ================= SCHOOL INQUIRY EMAIL ================= */
 
-// export const sendSchoolInquiryEmail = async (data) => {
-//   await transporter.sendMail({
-//     from: `"LetsReadIndia Website" <${process.env.EMAIL_USER}>`,
-//     to: "support@letsreadindia.com,shaiksaleem2831@gmail.com",
-//     subject: "New School Inquiry",
-//     html: `
-//       <h3>New School Inquiry Received</h3>
-//       <p><strong>School Name:</strong> ${data.schoolName}</p>
-//       <p><strong>Contact Person:</strong> ${data.contactPerson}</p>
-//       <p><strong>Email:</strong> ${data.email}</p>
-//       <p><strong>Phone:</strong> ${data.phone}</p>
-//       <p><strong>Student Count:</strong> ${data.studentCount}</p>
-//     `,
-//   });
-// };
+
 
 export const sendSchoolInquiryEmail = async (data) => {
   await transporter.sendMail({
@@ -250,22 +214,7 @@ export const sendSchoolInquiryEmail = async (data) => {
   });
 };
 
-// export const sendContactEmail = async (data) => {
-//   await transporter.sendMail({
-//     from: `"LetsReadIndia Contact" <${process.env.EMAIL_USER}>`,
-//     to: process.env.EMAIL_USER, // You receive the contact email
-//     subject: `New Contact Form: ${data.subject}`,
-//     html: `
-//       <h2>New Contact Inquiry</h2>
-//       <p><b>Name:</b> ${data.name}</p>
-//       <p><b>Email:</b> ${data.email}</p>
-//       <p><b>Phone:</b> ${data.phone}</p>
-//       <p><b>Subject:</b> ${data.subject}</p>
-//       <p><b>Message:</b></p>
-//       <p>${data.message}</p>
-//     `
-//   });
-// };
+
 
 export const sendContactEmail = async (data) => {
   await transporter.sendMail({

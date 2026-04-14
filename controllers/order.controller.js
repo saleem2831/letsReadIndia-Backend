@@ -3,7 +3,6 @@ import { db } from '../config/db.js';
 import { assignOrderToAdmin } from '../utils/assignAdmin.js';
 import crypto from 'crypto';
 
-// import { createDelhiveryShipment } from '../services/delhivery.service.js';
 import { sendOrderEmail } from '../services/email.service.js';
 import { sendWhatsAppMessage } from '../services/whatsapp.service.js';
 import { json } from 'stream/consumers';
@@ -135,7 +134,7 @@ const [orderResult] = await db.query(
 
   try {
     await sendOrderEmail(orderRow);
-    // console.log('Email sent');
+    // console.log('Email sent After');
   } catch (err) {
     console.error('Email failed:', err.message);
   }
@@ -155,13 +154,7 @@ const [orderResult] = await db.query(
       message: 'Order placed successfully',
       order_number
     });
-// setImmediate(async () => {
-//   try {
-//     await createDelhiveryShipment(orderRow, items);
-//   } catch (err) {
-//     console.error("Delhivery background failed:", err.message);
-//   }
-// });
+
 
 
   } catch (err) {
