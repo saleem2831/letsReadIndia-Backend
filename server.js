@@ -20,6 +20,31 @@ dotenv.config();
 
 const app = express();
 
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://letsreadindia.in',
+  'https://letsreadindia.in'
+];
+
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true, // if you're using cookies/auth headers
+  })
+);
+
+
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
