@@ -23,13 +23,14 @@ const app = express();
 
 app.use(cors({
   origin: [
-    'http://localhost:5173',
-    'http://letsreadindia.in',
-    'https://letsreadindia.in'
+    "http://letsreadindia.in",
+    "https://letsreadindia.in",
+    "http://www.letsreadindia.in",
+    "https://www.letsreadindia.in"
   ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
-
 
 app.use(cors());
 app.use(express.json());
