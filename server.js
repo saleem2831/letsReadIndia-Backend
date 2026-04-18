@@ -21,21 +21,26 @@ dotenv.config();
 const app = express();
 
 
-
+// ✅ SINGLE CORS CONFIG (ONLY THIS)
 app.use(cors({
   origin: [
-    "http://letsreadindia.in",
     "https://letsreadindia.in",
-    "http://www.letsreadindia.in",
     "https://www.letsreadindia.in"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true
 }));
 
+// ✅ HANDLE PREFLIGHT (IMPORTANT)
+app.use((req, res, next) => {
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(200);
+  }
+  next();
+});
 
 
-app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
