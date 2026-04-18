@@ -24,8 +24,7 @@ const app = express();
 // ✅ SINGLE CORS CONFIG (ONLY THIS)
 app.use(cors({
   origin: [
-    "https://letsreadindia.in",
-    "https://www.letsreadindia.in"
+    "https://letsreadindia.in"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
