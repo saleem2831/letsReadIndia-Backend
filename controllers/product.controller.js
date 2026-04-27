@@ -55,47 +55,6 @@ export const createProduct = async (req, res) => {
 
 
 
-// PUBLIC: Get active products (READ)
-// export const getProducts = async (req, res) => {
-//   const [products] = await db.query(
-//     "SELECT * FROM products WHERE status='active'"
-//   );
-
-//   res.json(products);
-// };
-
-// export const getProducts = async (req, res) => {
-//   const [products] = await db.query(
-//     "SELECT * FROM products WHERE status='active'"
-//   );
-
-//   const baseUrl = `${req.protocol}://${req.get('host')}`;
-
-//   const formatted = products.map(p => ({
-//     ...p,
-//     image: p.image ? `${baseUrl}/uploads/${p.image}` : null
-//   }));
-
-//   res.json(formatted);
-// };
-
-
-// export const getProducts = async (req, res) => {
-//   const [products] = await db.query(
-//     "SELECT * FROM products WHERE status='active'"
-//   );
-
-//   const baseUrl = `${req.protocol}://${req.get('host')}`;
-
-//   res.json(
-//     products.map(p => ({
-//       ...p,
-//       image: p.image ? `${baseUrl}/uploads/${p.image}` : null
-//     }))
-//   );
-// };
-
-
 export const getProducts = async (req, res) => {
   const [products] = await db.query(
     "SELECT * FROM products WHERE status='active'"
