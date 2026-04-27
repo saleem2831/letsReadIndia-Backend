@@ -1,9 +1,11 @@
 
 // import AWS from 'aws-sdk';
 import pkg from 'aws-sdk';
-const AWS = pkg;
 import sharp from 'sharp';
 import { v4 as uuid } from 'uuid';
+
+const AWS = pkg.default || pkg;
+
 
 const s3 = new AWS.S3({
   region: process.env.AWS_REGION,
@@ -11,21 +13,58 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
+console.log("S3 OBJECT:", s3);
+console.log("UPLOAD FUNCTION:", typeof s3.upload);
+
+// export const uploadToS3 = async (file) => {
+  
+//   const compressed = await sharp(file.buffer)
+//     .resize(1200)
+//     .jpeg({ quality: 70 })
+//     .toBuffer();
+
+//   const key = `products/${uuid()}.jpg`;
+
+//   const upload = await s3.upload({
+//     Bucket: process.env.AWS_BUCKET_NAME,
+//     Key: key,
+//     Body: compressed,
+//     ContentType: 'image/jpeg'
+//     // ❌ NO ACL HERE
+//   }).promise();
+
+//   return upload.Location;
+// };
+
+
 export const uploadToS3 = async (file) => {
-  const compressed = await sharp(file.buffer)
-    .resize(1200)
-    .jpeg({ quality: 70 })
-    .toBuffer();
+  try {
+    console.log("FILE:", file);
 
-  const key = `products/${uuid()}.jpg`;
+    const compressed = await sharp(file.buffer)
+      .resize(1200)
+      .jpeg({ quality: 70 })
+      .toBuffer();
 
-  const upload = await s3.upload({
-    Bucket: process.env.AWS_BUCKET_NAME,
-    Key: key,
-    Body: compressed,
-    ContentType: 'image/jpeg'
-    // ❌ NO ACL HERE
-  }).promise();
+    console.log("Compressed size:", compressed.length);
 
-  return upload.Location;
+    const key = `products/${uuid()}.jpg`;
+
+    console.log("Uploading to S3...");
+
+    const upload = await s3.upload({
+      Bucket: process.env.AWS_BUCKET_NAME,
+      Key: key,
+      Body: compressed,
+      ContentType: 'image/jpeg'
+    }).promise();
+
+    console.log("UPLOAD SUCCESS:", upload);
+
+    return upload.Location;
+
+  } catch (err) {
+    console.error("UPLOAD ERROR FULL:", err);
+    throw err;
+  }
 };
