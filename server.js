@@ -24,7 +24,8 @@ const app = express();
 // ✅ SINGLE CORS CONFIG (ONLY THIS)
 app.use(cors({
   origin: [
-    "https://letsreadindia.in"
+    "https://letsreadindia.in",
+    "https://www.letsreadindia.in",
       // "http://localhost:5173"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
