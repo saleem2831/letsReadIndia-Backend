@@ -14,6 +14,8 @@ import formsRoutes from "./routes/forms.routes.js";
 
 import path from 'path';
 
+import galleryRoutes from './routes/gallery.routes.js';
+
 
 
 dotenv.config();
@@ -24,9 +26,10 @@ const app = express();
 // ✅ SINGLE CORS CONFIG (ONLY THIS)
 app.use(cors({
   origin: [
-    "https://letsreadindia.in",
-    "https://www.letsreadindia.in",
-      // "http://localhost:5173"
+    // "https://letsreadindia.in",
+    // "https://www.letsreadindia.in",
+      "http://localhost:5173",
+      // "http://localhost:5173/products"
   ],
   methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   allowedHeaders: ["Content-Type", "Authorization"],
@@ -63,6 +66,7 @@ app.use('/api/customer',customerRoutes);
 
 
 app.use("/api/forms", formsRoutes);
+app.use("/api/gallery", galleryRoutes);
 
 
 app.get('/', (_, res) => res.send('Backend running'));

@@ -13,8 +13,8 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
 });
 
-console.log("S3 OBJECT:", s3);
-console.log("UPLOAD FUNCTION:", typeof s3.upload);
+// console.log("S3 OBJECT:", s3);
+// console.log("UPLOAD FUNCTION:", typeof s3.upload);
 
 // export const uploadToS3 = async (file) => {
   
@@ -46,7 +46,7 @@ export const uploadToS3 = async (file) => {
       .jpeg({ quality: 70 })
       .toBuffer();
 
-    console.log("Compressed size:", compressed.length);
+    // console.log("Compressed size:", compressed.length);
 
     const key = `products/${uuid()}.jpg`;
 
@@ -59,9 +59,13 @@ export const uploadToS3 = async (file) => {
       ContentType: 'image/jpeg'
     }).promise();
 
-    console.log("UPLOAD SUCCESS:", upload);
+    // console.log("UPLOAD SUCCESS:", upload);
 
-    return upload.Location;
+    // return upload.Location;
+    return {
+    url: upload.Location,
+    key
+};
 
   } catch (err) {
     console.error("UPLOAD ERROR FULL:", err);
