@@ -56,6 +56,10 @@ export const getCustomerOrderByNumber = async (req, res) => {
         pincode,
         subtotal,
         delivery_fee,
+        discount_amount,
+        currency,
+        shipping_mode,
+        estimated_delivery_days,
         total,
         payment_status,
         shipment_status,
@@ -98,9 +102,16 @@ export const getCustomerOrderByNumber = async (req, res) => {
       [order.id]
     );
 
+    const [shipmentEvents] = await db.query(
+      `SELECT shipment_status,activity,location,event_time,created_at
+       FROM shipment_events WHERE order_id=? ORDER BY COALESCE(event_time,created_at) DESC`,
+      [order.id]
+    );
+
     res.json({
       order,
       items,
+      shipment_events: shipmentEvents,
       tracking_url: order.waybill
         ? `https://shiprocket.co/tracking/${order.waybill}`
         : null

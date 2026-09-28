@@ -3,6 +3,8 @@
 import express from 'express';
 import {
   createAdmin,
+  changeOwnPassword,
+  getSuperAdmins,
   getAdmins,
   updateAdminStatus,
   deleteAdmin,
@@ -11,12 +13,15 @@ import {
   getAssignedOrders,
   updateOrderStatus,
   getOrderDetails,
+  getAllOrders,
+  getAllOrderDetails,
   updateReturnStatus,getAllReturnRequests,approveReturn,schedulePickup,shiprocketWebhook,processRefund
 } from '../controllers/admin.controller.js';
 
 import { protect } from '../middlewares/auth.middleware.js';
 import { superAdminOnly } from '../middlewares/role.middleware.js';
 import { shipOrder } from '../controllers/admin.controller.js';
+import { deleteReadingAssessment, downloadReadingAssessmentPDF, getReadingAssessment, getReadingAssessments, resendReadingAssessmentEmail } from '../controllers/readingAssessment.controller.js';
 
 const router = express.Router();
 
@@ -29,6 +34,10 @@ const router = express.Router();
 
 router.post('/create', protect, superAdminOnly, createAdmin);
 router.get('/', protect, superAdminOnly, getAdmins);
+router.get('/super-admins', protect, superAdminOnly, getSuperAdmins);
+router.put('/me/password', protect, superAdminOnly, changeOwnPassword);
+router.get('/all-orders', protect, superAdminOnly, getAllOrders);
+router.get('/all-orders/:id', protect, superAdminOnly, getAllOrderDetails);
 router.put('/status/:id', protect, superAdminOnly, updateAdminStatus);
 router.delete('/:id', protect, superAdminOnly, deleteAdmin);
 // router.put("/password/:id", superAdminOnly, updateAdminPassword);
@@ -46,6 +55,11 @@ router.get("/orders/:id/items", protect, getOrderDetails);
 // router.put("/orders/:id/status", verifyToken, isAdmin, updateOrderStatus);
 // router.get("/orders/:id/items", protect, adminOnly, getOrderDetails);
 router.post("/orders/:id/ship", protect, shipOrder);
+router.get("/reading-assessments", protect, superAdminOnly, getReadingAssessments);
+router.get("/reading-assessments/:id", protect, superAdminOnly, getReadingAssessment);
+router.post("/reading-assessments/:id/email", protect, superAdminOnly, resendReadingAssessmentEmail);
+router.get("/reading-assessments/:id/pdf", protect, superAdminOnly, downloadReadingAssessmentPDF);
+router.delete("/reading-assessments/:id", protect, superAdminOnly, deleteReadingAssessment);
 
 
 router.get("/returns", getAllReturnRequests);

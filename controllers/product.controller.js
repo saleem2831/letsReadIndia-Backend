@@ -1,6 +1,7 @@
 import { db } from '../config/db.js';
 import { uploadToS3 } from '../services/s3Upload.service.js';
 
+const normalizeHsn = (value) => String(value ?? "").trim().replace(/\s+/g, "");
 
 
 // =====================================================
@@ -8,20 +9,24 @@ import { uploadToS3 } from '../services/s3Upload.service.js';
 // =====================================================
 export const createProduct = async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
+    const { name, description, price, stock, weight_kg, length_cm, breadth_cm, height_cm, hsn_code } = req.body;
+    const normalizedHsn = normalizeHsn(hsn_code);
 
     if (!name || !price || !stock) {
       return res.status(400).json({
         message: "Missing required fields",
       });
     }
+    if (normalizedHsn && !/^\d{1,15}$/.test(normalizedHsn)) {
+      return res.status(400).json({ message: "HSN code must contain only 1 to 15 digits" });
+    }
 
     // Insert product
     const [product] = await db.query(
       `INSERT INTO products 
-       (name, description, price, stock, status)
-       VALUES (?,?,?,?,?)`,
-      [name, description, price, stock, "active"]
+       (name, description, price, stock, status, weight_kg, length_cm, breadth_cm, height_cm, hsn_code)
+       VALUES (?,?,?,?,?,?,?,?,?,?)`,
+      [name, description, price, stock, "active", weight_kg || .5, length_cm || 20, breadth_cm || 15, height_cm || 5, normalizedHsn || null]
     );
 
     const productId = product.insertId;
@@ -227,52 +232,203 @@ export const getProductsAdmin = async (req, res) => {
 // =====================================================
 // UPDATE PRODUCT
 // =====================================================
+// export const updateProduct = async (req, res) => {
+//   try {
+//     const { name, description, price, stock } = req.body;
+//     const productId = req.params.id;
+
+//     await db.query(
+//       `UPDATE products 
+//        SET name=?, description=?, price=?, stock=? 
+//        WHERE id=?`,
+//       [name, description, price, stock, productId]
+//     );
+
+//     if (req.files && req.files.length > 0) {
+
+//       // Delete old images
+//       await db.query(
+//         `DELETE FROM product_images WHERE product_id=?`,
+//         [productId]
+//       );
+
+//       // Upload new images
+//       for (let i = 0; i < req.files.length; i++) {
+
+//         const imageUrl = await uploadToS3(req.files[i]);
+
+//         await db.query(
+//           `INSERT INTO product_images 
+//            (product_id, image_url, is_primary)
+//            VALUES (?,?,?)`,
+//           [productId, imageUrl, i === 0 ? 1 : 0]
+//         );
+//       }
+//     }
+
+//     res.json({ message: "Product updated successfully" });
+
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({
+//       message: "Product update failed",
+//     });
+//   }
+// };
+
+
 export const updateProduct = async (req, res) => {
   try {
-    const { name, description, price, stock } = req.body;
+    const { name, description, price, stock, existingImages, weight_kg, length_cm, breadth_cm, height_cm, hsn_code } = req.body;
     const productId = req.params.id;
+    const normalizedHsn = normalizeHsn(hsn_code);
+    if (normalizedHsn && !/^\d{1,15}$/.test(normalizedHsn)) {
+      return res.status(400).json({ message: "HSN code must contain only 1 to 15 digits" });
+    }
 
+    // --------------------------------------------------
+    // 1. Update basic product information
+    // --------------------------------------------------
     await db.query(
-      `UPDATE products 
-       SET name=?, description=?, price=?, stock=? 
+      `UPDATE products
+       SET name=?, description=?, price=?, stock=?, weight_kg=?, length_cm=?, breadth_cm=?, height_cm=?, hsn_code=?
        WHERE id=?`,
-      [name, description, price, stock, productId]
+      [name, description, price, stock, weight_kg || .5, length_cm || 20, breadth_cm || 15, height_cm || 5, normalizedHsn || null, productId]
     );
 
-    if (req.files && req.files.length > 0) {
+    // --------------------------------------------------
+    // 2. Parse existing images coming from frontend
+    // --------------------------------------------------
+    let keptImages = [];
 
-      // Delete old images
-      await db.query(
-        `DELETE FROM product_images WHERE product_id=?`,
-        [productId]
-      );
+    if (existingImages) {
+      try {
+        keptImages = JSON.parse(existingImages);
 
-      // Upload new images
-      for (let i = 0; i < req.files.length; i++) {
-
-        const imageUrl = await uploadToS3(req.files[i]);
-
-        await db.query(
-          `INSERT INTO product_images 
-           (product_id, image_url, is_primary)
-           VALUES (?,?,?)`,
-          [productId, imageUrl, i === 0 ? 1 : 0]
-        );
+        if (!Array.isArray(keptImages)) {
+          keptImages = [];
+        }
+      } catch (error) {
+        console.error("Invalid existingImages JSON:", error);
+        keptImages = [];
       }
     }
 
-    res.json({ message: "Product updated successfully" });
+    // --------------------------------------------------
+    // 3. Get currently stored images from database
+    // --------------------------------------------------
+    const [currentImages] = await db.query(
+      `SELECT id, image_url, is_primary
+       FROM product_images
+       WHERE product_id=?
+       ORDER BY id ASC`,
+      [productId]
+    );
+
+    // --------------------------------------------------
+    // 4. Find which old images were removed
+    // --------------------------------------------------
+    const keptImageUrls = new Set(
+      keptImages.map((image) => {
+        if (typeof image === "string") {
+          return image;
+        }
+
+        return image?.image_url || image?.url || image?.path || "";
+      })
+    );
+
+    const imagesToDelete = currentImages.filter(
+      (image) => !keptImageUrls.has(image.image_url)
+    );
+
+    // --------------------------------------------------
+    // 5. Delete removed images from product_images
+    // --------------------------------------------------
+    for (const image of imagesToDelete) {
+      await db.query(
+        `DELETE FROM product_images
+         WHERE id=? AND product_id=?`,
+        [image.id, productId]
+      );
+
+      // IMPORTANT:
+      // If you also want to physically delete the image
+      // from S3, we can add that here.
+    }
+
+    // --------------------------------------------------
+    // 6. Upload newly added images
+    // --------------------------------------------------
+    const newUploadedImages = [];
+
+    if (req.files && req.files.length > 0) {
+      for (const file of req.files) {
+        const imageUrl = await uploadToS3(file);
+
+        newUploadedImages.push(imageUrl);
+      }
+    }
+
+    // --------------------------------------------------
+    // 7. Insert new images into product_images
+    // --------------------------------------------------
+    for (const imageUrl of newUploadedImages) {
+      await db.query(
+        `INSERT INTO product_images
+         (product_id, image_url, is_primary)
+         VALUES (?, ?, ?)`,
+        [
+          productId,
+          imageUrl,
+          0
+        ]
+      );
+    }
+
+    // --------------------------------------------------
+    // 8. Make sure there is a primary image
+    // --------------------------------------------------
+    const [finalImages] = await db.query(
+      `SELECT id
+       FROM product_images
+       WHERE product_id=?
+       ORDER BY id ASC`,
+      [productId]
+    );
+
+    if (finalImages.length > 0) {
+      await db.query(
+        `UPDATE product_images
+         SET is_primary=0
+         WHERE product_id=?`,
+        [productId]
+      );
+
+      await db.query(
+        `UPDATE product_images
+         SET is_primary=1
+         WHERE id=?`,
+        [finalImages[0].id]
+      );
+    }
+
+    // --------------------------------------------------
+    // 9. Success
+    // --------------------------------------------------
+    res.json({
+      message: "Product updated successfully",
+    });
 
   } catch (error) {
-    console.error(error);
+    console.error("UPDATE PRODUCT ERROR:", error);
+
     res.status(500).json({
       message: "Product update failed",
+      error: error.message,
     });
   }
 };
-
-
-
 
 
 

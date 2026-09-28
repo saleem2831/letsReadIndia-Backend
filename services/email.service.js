@@ -1,12 +1,44 @@
 import nodemailer from 'nodemailer';
+import { formatReadingAge } from '../utils/readingAge.js';
 
-const transporter = nodemailer.createTransport({
-  service: 'gmail',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  }
+const mailPort = Number(process.env.SMTP_PORT || 465);
+const transporter = nodemailer.createTransport(process.env.SMTP_HOST ? {
+  host: process.env.SMTP_HOST,
+  port: mailPort,
+  secure: process.env.SMTP_SECURE ? process.env.SMTP_SECURE === "true" : mailPort === 465,
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
+} : {
+  service: "gmail",
+  auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS },
 });
+
+const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (character) => ({
+  "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;",
+}[character]));
+
+export const sendReadingResultEmail = async ({ to, studentName, readingAge, classification, assessmentNumber, pdfBuffer }) => {
+  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
+    return { sent: false, error: "EMAIL_USER and EMAIL_PASS are not configured" };
+  }
+  if (!to) return { sent: false, error: "Parent email is missing" };
+  const info = await transporter.sendMail({
+    from: `"Let's Read India" <${process.env.EMAIL_USER}>`,
+    to,
+    subject: `Reading Age Assessment Result - ${studentName}`,
+    html: `<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#24171f">
+      <div style="background:#633fb5;color:#fff;padding:22px 28px;border-radius:14px 14px 0 0">
+        <h1 style="font-size:24px;margin:0">Let's Read India</h1><p style="margin:8px 0 0">Reading Age Assessment Result</p>
+      </div><div style="border:1px solid #e5def2;border-top:0;padding:28px;border-radius:0 0 14px 14px">
+        <p>Dear Parent,</p><p>The Reading Age assessment for <strong>${escapeHtml(studentName)}</strong> is complete.</p>
+        <p>Assessment number: <strong>${escapeHtml(assessmentNumber)}</strong></p>
+        <p>Reading age: <strong>${escapeHtml(readingAge === "B4" ? "Below 4 years" : formatReadingAge(readingAge))}</strong></p>
+        <p>Classification: <strong>${escapeHtml(classification)}</strong></p>
+        <p>The detailed result and response history are attached as a PDF.</p>
+      </div></div>`,
+    attachments: [{ filename: `${assessmentNumber}-reading-age-result.pdf`, content: pdfBuffer, contentType: "application/pdf" }],
+  });
+  return { sent: true, messageId: info.messageId };
+};
 
 // const transporter = nodemailer.createTransport({
 //   host: "smtp.zoho.com",

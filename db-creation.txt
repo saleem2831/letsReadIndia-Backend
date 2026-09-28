@@ -137,3 +137,44 @@ ALTER TABLE returns
 ADD COLUMN shiprocket_shipment_id VARCHAR(255),
 ADD COLUMN pickup_status VARCHAR(100),
 ADD COLUMN refunded_at TIMESTAMP NULL;
+
+
+CREATE TABLE gallery_images (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    title VARCHAR(255) NOT NULL,
+
+    description TEXT,
+
+    image_url TEXT NOT NULL,
+
+    s3_key VARCHAR(500) NOT NULL,
+
+    status ENUM('active','inactive') DEFAULT 'active',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE gallery_videos (
+
+    id INT AUTO_INCREMENT PRIMARY KEY,
+
+    title VARCHAR(255) NOT NULL,
+
+    description TEXT,
+
+    youtube_url TEXT NOT NULL,
+
+    embed_url TEXT NOT NULL,
+
+    status ENUM('active','inactive') DEFAULT 'active',
+
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    ON UPDATE CURRENT_TIMESTAMP
+);
